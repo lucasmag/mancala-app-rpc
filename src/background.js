@@ -15,11 +15,12 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 process.on('uncaughtException', function(err) {
-  if(err.errno === 'EADDRINUSE')
+  if(err.errno === 'EADDRINUSE') 
        console.log('Mancala server already started! Skipping...');
-  else
+  else {
        console.log(err);
        process.exit(1);
+  }
 });  
 
 try {
