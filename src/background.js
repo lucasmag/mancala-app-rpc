@@ -14,6 +14,30 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
+process.on('uncaughtException', function(err) {
+  if(err.errno === 'EADDRINUSE')
+       console.log('Mancala server already started! Skipping...');
+  else
+       console.log(err);
+       process.exit(1);
+});  
+
+try {
+  const io = require('socket.io')(4113, { serveClient: false });
+  io.on('connection', function (socket) {
+      console.log('Mancala server initialized.')
+  
+      // when the client emits 'new message', this listens and executes
+      socket.on('message', (msg) => {
+          io.emit('message', msg);
+      });
+      
+  });
+} catch (e) {
+  console.log(e)
+}
+
+
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
@@ -22,7 +46,7 @@ function createWindow() {
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
+      nodeIntegration: true
     }
   })
 

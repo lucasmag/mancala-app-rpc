@@ -15,14 +15,35 @@ export default {
   data() {
     return { 
       message: "",
-      toSend: ""
+      toSend: "",
+      isConnected: false,
+      socketMessage: ''
     }
   },
   methods: {
-    sendMessage: function () {
-      this.message = this.toSend
+    sendMessage: function() {
+      this.$socket.emit('message', this.toSend)
     }
-  }
+  },
+  sockets: {
+    connect() {
+      // Fired when the socket connects.
+      this.isConnected = true;
+    },
+
+    disconnect() {
+      this.isConnected = false;
+    },
+
+    // Fired when the server sends something on the "messageChannel" channel.
+    message(data) {
+      this.socketMessage = data
+
+      this.message = this.socketMessage
+    }
+  },
+
+
 }
 </script>
 
