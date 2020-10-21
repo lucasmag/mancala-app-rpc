@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import App from './App.vue'
-//socket io
 import * as io from "socket.io-client";
 import VueSocketIO from "vue-socket.io";
 
@@ -10,7 +9,6 @@ Vue.use(
     connection: io('http://localhost:4113'), //options object is Optional
   })
 );
-
 
 Vue.config.productionTip = false
 

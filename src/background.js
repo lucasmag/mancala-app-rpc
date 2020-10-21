@@ -3,7 +3,25 @@
 import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+// Initialize the development socket server
+if (isDevelopment) {
+  console.log(".");
+  console.log(".");
+  console.log(".");
+  console.log(".");
+
+  console.log('>>>>>>>> Initializing socket server... <<<<<<<<<');
+
+  
+  console.log(".");
+  console.log(".");
+  console.log(".");
+  console.log(".");
+  require('./server');
+}
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -21,29 +39,13 @@ process.on('uncaughtException', function(err) {
        console.log(err);
        process.exit(1);
   }
-});  
-
-try {
-  const io = require('socket.io')(4113, { serveClient: false });
-  io.on('connection', function (socket) {
-      console.log('Mancala server initialized.')
-  
-      // when the client emits 'new message', this listens and executes
-      socket.on('message', (msg) => {
-          io.emit('message', msg);
-      });
-      
-  });
-} catch (e) {
-  console.log(e)
-}
-
+});
 
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1366,
+    height: 768,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
