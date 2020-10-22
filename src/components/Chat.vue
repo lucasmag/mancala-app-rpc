@@ -2,7 +2,7 @@
   <div class="chat">
     <div class="chatArea">
         <ul class="messages" >
-          <li class="log" v-for="message in messages" v-bind:key="message"> 
+          <li class="log" v-for="message in messages" v-bind:key="message.text"> 
             <b>{{ message.user }}:</b> {{ message.text }} 
           </li>
         </ul>
@@ -57,7 +57,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .chat {
-    width: 600px;
+    width: 500px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
