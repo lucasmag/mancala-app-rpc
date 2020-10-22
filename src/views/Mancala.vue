@@ -55,7 +55,7 @@ export default {
 
 <style scoped>
 .board {
-    width: 80vw;
+    width: 100%;
     height: 30vw;
     background-color: bisque;
     padding: 20px;

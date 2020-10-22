@@ -1,17 +1,20 @@
 <template>
-  <div>
+  <div class="base">
       <Mancala></Mancala>
-    
+      <Chat class="chat"></Chat>
   </div>
 </template>
 
 <script>
 import Mancala from './Mancala.vue'
+import Chat from '../components/Chat.vue'
+
 
 export default {
   name: 'Home',
   components: {
-    Mancala
+    Mancala,
+    Chat
   },
   data() {
     return { 
@@ -45,5 +48,8 @@ export default {
 </script>
 
 <style scoped>
+  .base {
+    display: flex;
+  } 
 
 </style>

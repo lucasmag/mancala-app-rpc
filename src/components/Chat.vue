@@ -1,7 +1,12 @@
 <template>
-  <div class="hello">
-    <h1>Mancala</h1>
-    <p>{{ message }}</p>
+  <div class="chat">
+    <div class="chatArea">
+        <ul class="messages" >
+          <li class="log" v-for="message in messages" v-bind:key="message"> 
+            <b>{{ message.user }}:</b> {{ message.text }} 
+          </li>
+        </ul>
+    </div>
     <div class="message">
       <textarea rows="2" v-model="toSend" class="input-message"></textarea>
       <button class="send" v-on:click="sendMessage">Enviar</button>
@@ -14,7 +19,7 @@ export default {
   name: 'Chat',
   data() {
     return { 
-      message: "",
+      messages: [],
       toSend: "",
       isConnected: false,
       socketMessage: ''
@@ -22,7 +27,8 @@ export default {
   },
   methods: {
     sendMessage: function() {
-      this.$socket.emit('message', this.toSend)
+      const data = {"user": "Lucas", "text": this.toSend}
+      this.$socket.emit('message', data)
     }
   },
   sockets: {
@@ -39,7 +45,8 @@ export default {
     message(data) {
       this.socketMessage = data
 
-      this.message = this.socketMessage
+      this.messages.push(this.socketMessage);
+      this.toSend = ""
     }
   },
 
@@ -49,16 +56,47 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .message {
-    bottom: 0;
-    position: absolute;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+  .chat {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    background-color:moccasin;
   }
 
-  .input-message {
-    margin: 0;
-    resize: none;
+  .message {
+    padding: 0 5px;
+    display: flex;
+    gap: 4px;
   }
+
+  .messages {
+  height: 100%;
+  margin: 0;
+  overflow-y: scroll;
+  padding: 20px;
+}
+
+.input-message {
+  margin: 0;
+  resize: none;
+  width: 100%;
+}
+
+.chatArea {
+  height: 100%;
+  padding-bottom: 60px;
+}
+
+.log {
+  margin: 5px;
+  text-align: start;
+}
+
+ul {
+  list-style: none;
+  overflow-wrap: break-word;
+
+}
 </style>

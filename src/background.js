@@ -8,18 +8,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Initialize the development socket server
 if (isDevelopment) {
-  console.log(".");
-  console.log(".");
-  console.log(".");
-  console.log(".");
-
   console.log('>>>>>>>> Initializing socket server... <<<<<<<<<');
-
-  
-  console.log(".");
-  console.log(".");
-  console.log(".");
-  console.log(".");
   require('./server');
 }
 
