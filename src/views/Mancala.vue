@@ -2,16 +2,14 @@
     <div class="board">
         <Bean/>
         <div class="grid-container">
-            <div v-for="(isBase, hole) in holes" :key="hole" :class="hole">
-                <Hole :isBase="isBase"/>
+            <div v-for="(hole, index) in holes" :key="hole.class" :class="hole.class">
+                <Hole v-on:click="makeMove" :isBase="hole.isBase" :initialBeansQtt="hole.beansQtt" :index="index"/>
             </div>
-
         </div>
     </div>
 </template>
 
 <script>
-import { Board } from "../models/Board.js";
 import Hole from "./Hole.vue";
 import Bean from "./Bean.vue";
 
@@ -24,41 +22,41 @@ export default {
     },
     data() {
         return {
-            holes: {
-                "zero": false, 
-                "one": false, 
-                "two": false, 
-                "three": false,
-                "four": false,
-                "five": false,
-                "six": true,
-                "seven": false,
-                "eight": false,
-                "nine": false,
-                "ten": false,
-                "eleven": false,
-                "twelve": false,
-                "thirteen": true
-                }
+            holes: []
         };
     },
     methods: {
         move: function() {
             const position = this.$refs.base1.getBoundingClientRect()
             console.log(position);
+        },
+        makeMove: function(position) {
+            this.$socket.emit('makeMove', position)
         }
     },
     created() {
-        let board = new Board();
-        console.log(board);
-        board.holes[0].move();
-        board.holes[11].move();
-        board.holes[0].move();
-        board.holes[10].move();
-        board.holes[0].move();
-        board.holes[11].move();
 
-        console.log(board);
+    },
+    sockets: {
+        connect() {
+        // Fired when the socket connects.
+        this.isConnected = true;
+        },
+
+        disconnect() {
+        this.isConnected = false;
+        },
+
+        // Fired when the server sends something on the "messageChannel" channel.
+        makeMove(data) {
+            this.holes = data
+        },
+
+        startGame(data) {
+            this.holes = data
+            console.log(this.holes);
+        }
+
     },
 };
 </script>

@@ -2,7 +2,7 @@ import { Hole } from './Hole.js'
 
 
 export class Board {
-    holes = [new Array(14)];
+    holes = new Array(14);
     player1;
     player2;
 

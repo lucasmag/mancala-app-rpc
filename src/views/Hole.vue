@@ -1,20 +1,34 @@
 <template>
+<div>
+    <div v-if="showOnTop" class="beansQtt"> {{ this.beansQuantity }} </div>
     <div v-bind:class="baseType" ></div>
+    <div v-if="!showOnTop" class="beansQtt"> {{ this.beansQuantity }}</div>
+</div>
 </template>
 
 <script>
 export default {
     name: "Hole",
     props: {
-        isBase: Boolean
+        isBase: Boolean,
+        initialBeansQtt: Number,
+        index: String,
+    },
+    data() {
+        return {
+            beansQuantity: this.initialBeansQtt
+        };
     },
     computed: {
         baseType: function () {
             if (this.isBase)
                 return "baseHole"
             return "normalHole"
+        },
+        showOnTop: function () {
+            return (6 < parseInt(this.index) && parseInt(this.index) < 13)
         }
-}
+    }
 }
 </script>
 
@@ -33,5 +47,10 @@ export default {
     background-color: burlywood;
     margin: 10px;
     border-radius: 30px;
+}
+
+.beansQtt {
+    width: 100%;
+    padding: 2px;
 }
 </style>
