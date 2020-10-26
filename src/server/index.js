@@ -13,9 +13,8 @@ let board = new Board()
 
 io.on('connection', function (socket) {
     console.log('Mancala server initialized.')
-    console.log(board.holesState);
     
-    io.emit('startGame', board.holesState)
+    io.emit('startGame', board.getState())
 
     socket.on('message', (msg) => {
         io.emit('message', msg)

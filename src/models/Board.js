@@ -20,7 +20,10 @@ export class Board {
     makeMove(holeIndex){
         this.holes[holeIndex].move()
         this.holesState = this.holes.map((hole) => { return hole.beansQuantity })
-        console.log(this.holesState);
+        return this.holesState
+    }
+
+    getState(){
         return this.holesState
     }
 }
