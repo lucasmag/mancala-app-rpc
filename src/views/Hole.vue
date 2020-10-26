@@ -11,12 +11,11 @@ export default {
     name: "Hole",
     props: {
         isBase: Boolean,
-        initialBeansQtt: Number,
-        index: String,
+        index: Number,
+        beansQuantity: Number
     },
     data() {
         return {
-            beansQuantity: this.initialBeansQtt
         };
     },
     computed: {
@@ -26,7 +25,7 @@ export default {
             return "normalHole"
         },
         showOnTop: function () {
-            return (6 < parseInt(this.index) && parseInt(this.index) < 13)
+            return (6 < this.index && this.index < 13)
         }
     }
 }

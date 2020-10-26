@@ -2,8 +2,13 @@
     <div class="board">
         <Bean/>
         <div class="grid-container">
-            <div v-for="(hole, index) in holes" :key="hole.class" :class="hole.class">
-                <Hole v-on:click="makeMove" :isBase="hole.isBase" :initialBeansQtt="hole.beansQtt" :index="index"/>
+            <div 
+                v-for="(hole, index) in holes" 
+                :key="hole.class" 
+                :class="hole.class"
+                v-on:click="makeMove(index)"
+            >
+                <Hole :isBase="hole.isBase" :beansQuantity="holesState[index]" :index="index"/>
             </div>
         </div>
     </div>
@@ -22,7 +27,23 @@ export default {
     },
     data() {
         return {
-            holes: []
+            holes: [
+                {"class": "zero", "isBase": false },
+                 {"class": "one", "isBase": false },
+                 {"class": "two", "isBase": false },
+                 {"class": "three", "isBase": false },
+                 {"class": "four", "isBase": false },
+                 {"class": "five", "isBase": false },
+                 {"class": "six", "isBase": true },
+                 {"class": "seven", "isBase": false },
+                 {"class": "eight", "isBase": false },
+                 {"class": "nine", "isBase": false },
+                 {"class": "ten", "isBase": false },
+                 {"class": "eleven", "isBase": false },
+                 {"class": "twelve", "isBase": false },
+                 {"class": "thirteen", "isBase": true },
+            ],
+            holesState: []
         };
     },
     methods: {
@@ -30,12 +51,10 @@ export default {
             const position = this.$refs.base1.getBoundingClientRect()
             console.log(position);
         },
-        makeMove: function(position) {
-            this.$socket.emit('makeMove', position)
+        makeMove: function(holeIndex) {
+            if (holeIndex !== 6 && holeIndex !== 13)
+                this.$socket.emit('makeMove', holeIndex)
         }
-    },
-    created() {
-
     },
     sockets: {
         connect() {
@@ -48,13 +67,12 @@ export default {
         },
 
         // Fired when the server sends something on the "messageChannel" channel.
-        makeMove(data) {
-            this.holes = data
+        updateState(holesState) {
+            this.holesState = holesState
         },
 
         startGame(data) {
-            this.holes = data
-            console.log(this.holes);
+            this.holesState = data
         }
 
     },
