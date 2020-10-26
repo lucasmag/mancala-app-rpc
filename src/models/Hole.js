@@ -1,27 +1,21 @@
 export class Hole {
-    beansQuantity;
-    isBase;
-    nextHole;
-
-    constructor(beansQuantity, isBase, nextHole) {
-        this.beansQuantity = beansQuantity
-        this.isBase = isBase;
-        this.nextHole = nextHole;
+    constructor(beansQuantity, nextHole) {
+      this.beansQuantity = beansQuantity;
+      this.nextHole = nextHole;
     }
-
-    fowardBeans(beansAmount) {
+      fowardBeans(beansAmount) {
         if (beansAmount > 0) {
-            this.beansQuantity += 1;
-            beansAmount -= 1;
-
-            this.nextHole.fowardBeans(beansAmount);
+          this.beansQuantity += 1;
+          beansAmount -= 1;
+  
+          this.nextHole.fowardBeans(beansAmount);
         }
-    }
-
-    move(){
+      }
+  
+      move() {
         let beansAmount = this.beansQuantity;
         this.beansQuantity = 0;
-
+  
         this.nextHole.fowardBeans(beansAmount);
-    }
-}
+      }
+  }
