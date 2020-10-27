@@ -43,7 +43,8 @@ export default {
                  {"class": "twelve", "isBase": false },
                  {"class": "thirteen", "isBase": true },
             ],
-            holesState: []
+            holesState: [],
+            baseIndex: Number
         };
     },
     methods: {
@@ -59,6 +60,7 @@ export default {
     sockets: {
         connect() {
         // Fired when the socket connects.
+        console.log('client connected');
         this.isConnected = true;
         },
 

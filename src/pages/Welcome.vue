@@ -1,29 +1,28 @@
 <template>
-  <div class="base">
-      <Mancala></Mancala>
-      <Chat class="chat"></Chat>
+  <div class="">
+      <h1>Mancala</h1>
+      <form>
+          <input type="text" placeholder="usuário" min="3" required v-model="username">
+          <input type="submit" v-on:click="login()">
+          <router-link to="/game">Mancala</router-link>
+      </form>
   </div>
 </template>
 
 <script>
-import Mancala from './Mancala.vue'
-import Chat from '../components/Chat.vue'
 
 
 export default {
-  name: 'Home',
-  components: {
-    Mancala,
-    Chat
-  },
+  name: 'Welcome',
   data() {
     return { 
-
+        username: String
     }
   },
   methods: {
-    sendMessage: function() {
-      
+    login: function() {
+      console.log("hehehe");
+
     }
   },
   sockets: {

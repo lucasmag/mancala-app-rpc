@@ -2,8 +2,8 @@
   <div class="chat">
     <div class="chatArea">
         <ul class="messages" >
-          <li class="log" v-for="message in messages" v-bind:key="message.text"> 
-            <b>{{ message.user }}:</b> {{ message.text }} 
+          <li class="log" v-for="message in messages" v-bind:key="message.data"> 
+            <b>{{ message.user }}:</b> {{ message.data }} 
           </li>
         </ul>
     </div>
@@ -17,23 +17,33 @@
 <script>
 export default {
   name: 'Chat',
+    props: {
+      username: String,
+      roomId: String
+    },
   data() {
     return { 
       messages: [],
       toSend: "",
       isConnected: false,
-      socketMessage: ''
+      socketMessage: '',
+      me: this.username,
+      room: ''
     }
   },
   methods: {
     sendMessage: function() {
-      const data = {"user": "Lucas", "text": this.toSend}
+      const data = {"user": this.me, "data": this.toSend, "room": this.roomId}
       this.$socket.emit('message', data)
     }
   },
+  created() {
+     this.$socket.emit("join", this.roomId);
+
+  },
   sockets: {
     connect() {
-      // Fired when the socket connects.
+      console.log("conectado pcr");
       this.isConnected = true;
     },
 

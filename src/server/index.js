@@ -7,21 +7,30 @@ let board = new Board()
 
   // Chatroom
   var room = {
+    id: '',
     users: [],
-    messages: []
+    messages: [
+
+    ]
   };
+  var rooms = []
 
 io.on('connection', function (socket) {
     console.log('Mancala server initialized.')
     
     io.emit('startGame', board.getState())
 
-    socket.on('message', (msg) => {
-        io.emit('message', msg)
+    socket.on('message', (data) => {
+        io.to(data.room).emit('message', data)
     });
 
-    socket.on('makeMove', (holeIndex) => {
+    socket.on('make move', (holeIndex) => {
       const holesState = board.makeMove(holeIndex)
-      io.emit('updateState', holesState)
+      io.to(data.room).emit('updateState', holesState)
     });
+
+    socket.on("join", roomName => {
+      socket.join(roomName);
+    })
+
 });
