@@ -1,6 +1,6 @@
 <template>
   <div class="base">
-      <Mancala></Mancala>
+      <Mancala :isHost="isHost" :roomId="roomId"></Mancala>
       <Chat :username="username" :roomId="roomId"></Chat>
   </div>
 </template>
@@ -16,13 +16,7 @@ export default {
     Mancala,
     Chat
   },
-  props: ['username', "roomId"],
-  data() {
-    console.log("aaaaaaaa" + this.username +  this.roomId)
-    return { 
-
-    }
-  }
+  props: ['username', 'roomId', 'isHost'],
 }
 </script>
 

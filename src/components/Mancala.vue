@@ -1,14 +1,16 @@
 <template>
-    <div class="board">
-        <Bean/>
-        <div class="grid-container">
-            <div 
-                v-for="(hole, index) in holes" 
-                :key="hole.class" 
-                :class="hole.class"
-                v-on:click="makeMove(index)"
-            >
-                <Hole :isBase="hole.isBase" :beansQuantity="holesState[index]" :index="index"/>
+    <div>
+        <h3 v-if="!this.readyToPlay">Aguardando jogador... sala: {{this.roomId}}</h3>
+        <div class="board" v-if="this.readyToPlay">
+            <Bean/>
+            <div class="grid-container">
+                <div v-for="(hole, index) in holes" 
+                    :key="hole.class" 
+                    :class="hole.class"
+                    v-on:click="makeMove(index)">
+
+                    <Hole :isBase="hole.isBase" :beansQuantity="gameState[index]" :index="index"/>
+                </div>
             </div>
         </div>
     </div>
@@ -25,6 +27,7 @@ export default {
         Hole,
         Bean
     },
+    props: ['isHost', 'roomId'],
     data() {
         return {
             holes: [
@@ -43,38 +46,46 @@ export default {
                  {"class": "twelve", "isBase": false },
                  {"class": "thirteen", "isBase": true },
             ],
-            holesState: [],
-            baseIndex: Number
+            gameState: [],
+            myTurn: this.isHost,
+            readyToPlay: false
         };
     },
     methods: {
-        move: function() {
+        moveBean: function() {
             const position = this.$refs.base1.getBoundingClientRect()
             console.log(position);
         },
         makeMove: function(holeIndex) {
-            if (holeIndex !== 6 && holeIndex !== 13)
-                this.$socket.emit('makeMove', holeIndex)
+            const data = {"roomId": this.roomId, "holeIndex": holeIndex}
+
+            if (holeIndex !== 6 && holeIndex !== 13) {
+                if (this.myTurn)
+                    this.$socket.emit('makeMove', data)
+                // TODO Show that is not my turn
+            }
+                
         }
     },
+    created() {
+        console.log('mancala criado');
+        this.$socket.emit("joinGame", this.roomId);
+    },
     sockets: {
-        connect() {
-        // Fired when the socket connects.
-        console.log('client connected');
-        this.isConnected = true;
-        },
 
-        disconnect() {
-        this.isConnected = false;
-        },
 
-        // Fired when the server sends something on the "messageChannel" channel.
-        updateState(holesState) {
-            this.holesState = holesState
+        updateState(data) {
+            console.log(data.gameState + ' - ' + data.playAgain);
+            if (!data.playAgain)
+                this.myTurn = !this.myTurn
+            
+            this.gameState = data.gameState
         },
 
         startGame(data) {
-            this.holesState = data
+            this.readyToPlay = true
+            console.log(data);
+            this.gameState = data
         }
 
     },
