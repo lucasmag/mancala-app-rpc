@@ -9,6 +9,8 @@ export class Hole {
       this.index = index
     }
 
+    // Funcão que repassa feijões para frente, e deixa 1 em casa casa
+    // Retorna o indice da casa em que o ultimo feijão parou
     fowardBeans(beansAmount) {
         if (beansAmount > 0) {
             if(!(this.type == holeType.OPONENT_BASE)) {

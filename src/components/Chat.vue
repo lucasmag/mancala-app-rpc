@@ -49,6 +49,7 @@ export default {
         this.$socket.emit("getMessages", this.roomId);
     },
     sockets: {
+        // Escuta novas mensagens
         message(data) {
             console.log(data);
             this.messages = data

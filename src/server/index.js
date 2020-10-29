@@ -1,7 +1,22 @@
 
 const io = require('socket.io')(4113, { serveClient: false });
 import { Board } from '../models/Board.js'
-import { action } from '../enums/action.js' 
+import { action } from '../enums/action.js'
+
+// Estrutura de uma sala
+//  "D0R3C": {
+//     players: [ 'Lucas', 'Ana' ],
+//     messages: [
+//         {'user': 'Lucas',
+//         'message: 'Olá!',
+//         'date: 2020-10-18 13:23:03'
+//     ],
+//     gameState: [
+//       4, 4, 0, 5, 5, 5,
+//       1, 4, 4, 4, 4, 4,
+//       4, 0
+//     ]
+//   }
 
 let rooms = {}
 let boards = {}

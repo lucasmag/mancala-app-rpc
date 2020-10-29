@@ -9,6 +9,7 @@ export class Board {
         this.toInitialState()
     }
 
+    // Faz um jogada e retorna próxima ação
     makeMove(holeIndex){
         this.changeTurn(holeIndex)
 
@@ -31,6 +32,7 @@ export class Board {
             holeAction = action.PLAY_AGAIN
 
         
+        // Verifica se ultimo feijao caiu em minha casa vazia e, em caso positivo, rouba os feijões da casa equivalente do oponente, caso tenha
         else if (this.holes[indexOfLastHole].type == holeType.MY_HOLE &&
             this.holes[indexOfLastHole].beansQuantity == 1) {
 
@@ -116,6 +118,7 @@ export class Board {
         return newType
     }
 
+    // Verifica se todas as casas de um jogador estão vazias
     checkEndOfGame(holeIndex) {
         let totalBeans = this.getTotalBeansOfPlayer(holeIndex, false)
 
@@ -160,6 +163,7 @@ export class Board {
         return total
     }
 
+    // Estado inicial do jogo
     toInitialState() {
         this.gameState = [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0]
         // this.gameState = [0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0]
