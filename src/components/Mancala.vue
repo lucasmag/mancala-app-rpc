@@ -1,16 +1,18 @@
 <template>
     <div class="background">
-        <h3 v-if="!this.readyToPlay">Aguardando jogador... sala: {{this.roomId}}</h3>
+        <h3 v-if="!this.readyToPlay">Aguardando jogador...</h3> 
+        <h1 v-if="!this.readyToPlay">sala: {{this.roomId}}</h1>
+        <h1 v-if="this.readyToPlay" style="color: #BBB;">
+            {{this.myTurn ? 'Sua vez' : 'Vez de ' + this.oponent}}
+        </h1>
 
         <div class="board" v-if="this.readyToPlay">
-            <Bean/>
-            <div class="grid-container">
+            <div :class="this.isHost ? 'grid-container-host' : 'grid-container-client'">
                 <div v-for="(hole, index) in holes" 
                     :key="hole.class" 
-                    :class="hole.class"
-                    v-on:click="makeMove(index)">
-
-                    <Hole :isBase="hole.isBase" :beansQuantity="gameState[index]" :index="index"/>
+                    :class="[hole.class, 'base-center']"
+                    >
+                    <Hole :isBase="hole.isBase" @click.native="makeMove(index)" :isHost="isHost" :beansQuantity="gameState[index]" :index="index"/>
                 </div>
             </div>
         </div>
@@ -60,7 +62,6 @@
 
 <script>
 import Hole from "./Hole.vue";
-import Bean from "./Bean.vue";
 import { action } from '../enums/action.js' 
 
 
@@ -68,7 +69,6 @@ export default {
     name: "Mancala",
     components: {
         Hole,
-        Bean
     },
     props: ['isHost', 'roomId', 'player'],
     data() {
@@ -96,7 +96,7 @@ export default {
             endGame: false,
             oponent: String,
             giveUpDialog: false,
-            restartDialog: false
+            restartDialog: false,
         };
     },
     methods: {
@@ -106,11 +106,18 @@ export default {
         },
         makeMove: function(holeIndex) {
             const data = {"roomId": this.roomId, "holeIndex": holeIndex}
-
-            if (holeIndex !== 6 && holeIndex !== 13) {
-                if (this.myTurn)
-                    this.$socket.emit('makeMove', data)
-                // TODO Show that is not my turn
+            if (this.gameState[holeIndex] > 0) {
+                if (this.isHost) {
+                    if (holeIndex < 6) {
+                        if (this.myTurn)
+                            this.$socket.emit('makeMove', data)
+                    }
+                } else {
+                    if (holeIndex > 6 && holeIndex < 13) {
+                        if (this.myTurn)
+                            this.$socket.emit('makeMove', data)
+                    }
+                }
             }
                 
         },
@@ -225,7 +232,7 @@ export default {
     margin-top: 50px;
 }
 
-.grid-container {
+.grid-container-host {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: auto auto;
@@ -234,8 +241,19 @@ export default {
     "thirteen twelve eleven ten nine eight seven six"
     "thirteen zero one two three four five six";
 }
+
+.grid-container-client {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 5px 5px;
+  grid-template-areas:
+    "six five four three two one zero thirteen"
+    "six seven eight nine ten eleven twelve thirteen";
+}
+.base-center{ align-self: center;}
 .thirteen { grid-area: thirteen; }
-.six { grid-area: six; align-self: end;}
+.six { grid-area: six; }
 .twelve { grid-area: twelve; }
 .zero { grid-area: zero; }
 .one { grid-area: one; }

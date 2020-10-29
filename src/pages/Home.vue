@@ -119,7 +119,7 @@ export default {
 
 .options {
     position: absolute;
-padding: 0;
+    padding: 0;
   height:-webkit-fill-available;
   width: 300px;
   display: flex;

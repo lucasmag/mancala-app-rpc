@@ -1,8 +1,9 @@
 <template>
 <div>
-    <div v-if="showOnTop" class="beansQtt"> {{ this.beansQuantity }} </div>
-    <div v-bind:class="baseType" ></div>
-    <div v-if="!showOnTop" class="beansQtt"> {{ this.beansQuantity }}</div>
+    <div v-bind:class="baseType" class="hole" >
+            <div class="beansQtt"> {{ this.beansQuantity }} </div>
+    </div>
+    <!-- <div v-if="!showOnTop" class="beansQtt"> {{ this.beansQuantity }}</div> -->
 </div>
 </template>
 
@@ -12,12 +13,10 @@ export default {
     props: {
         isBase: Boolean,
         index: Number,
-        beansQuantity: Number
+        beansQuantity: Number,
+        isHost: Boolean,
     },
-    data() {
-        return {
-        };
-    },
+
     computed: {
         baseType: function () {
             if (this.isBase)
@@ -25,7 +24,10 @@ export default {
             return "normalHole"
         },
         showOnTop: function () {
-            return (6 < this.index && this.index < 13)
+            if (this.isHost)
+                return (6 < this.index && this.index < 13)
+            else 
+                return (6 > this.index)
         }
     }
 }
@@ -39,10 +41,13 @@ export default {
     margin: 10px;
     border-radius: 30px;
 }
+.normalHole:hover {
+  background-color: rgb(99, 206, 108);
+}
 
 .baseHole {
     width: 8vw;
-    height: 16vw;
+    height: 18vw;
     background-color: rgb(135, 222, 150);
     margin: 10px;
     border-radius: 30px;
@@ -51,5 +56,13 @@ export default {
 .beansQtt {
     width: 100%;
     padding: 2px;
+    font-weight: bolder;
+    font-size: 25px;
+    color: rgb(109, 109, 109);
+}
+
+.hole {
+    display: flex;
+    align-items: center;
 }
 </style>

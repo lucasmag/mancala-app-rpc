@@ -1,7 +1,4 @@
-import { action } from '../enums/action.js';
 import { holeType } from '../enums/holeType.js' 
-import { oposite } from '../enums/opositeHole.js' 
-
 
 
 export class Hole {
@@ -11,6 +8,7 @@ export class Hole {
       this.type = type
       this.index = index
     }
+
     fowardBeans(beansAmount) {
         if (beansAmount > 0) {
             if(!(this.type == holeType.OPONENT_BASE)) {

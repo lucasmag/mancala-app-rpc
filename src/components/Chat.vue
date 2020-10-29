@@ -39,9 +39,10 @@ export default {
     },
     methods: {
         sendMessage: function () {
-            const data = { "user": this.username, "message": this.toSend, "roomId": this.roomId }
-            this.$socket.emit("message", data);
-            
+            if (this.toSend !== ''){
+                const data = { "user": this.username, "message": this.toSend, "roomId": this.roomId }
+                this.$socket.emit("message", data);
+            }            
         },
     },
     created() {
@@ -63,7 +64,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: rgb(221, 221, 221);
+    background-color: rgb(230, 230, 230);
 }
 
 .toSend {
