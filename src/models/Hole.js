@@ -1,21 +1,53 @@
+import { holeType } from '../enums/holeType.js' 
+
+
 export class Hole {
-    constructor(beansQuantity, nextHole) {
+    constructor(beansQuantity, nextHole, type, index) {
       this.beansQuantity = beansQuantity;
       this.nextHole = nextHole;
+      this.type = type
+      this.index = index
     }
-      fowardBeans(beansAmount) {
+
+    fowardBeans(beansAmount) {
         if (beansAmount > 0) {
-          this.beansQuantity += 1;
-          beansAmount -= 1;
-  
-          this.nextHole.fowardBeans(beansAmount);
+            if(!(this.type == holeType.OPONENT_BASE)) {
+                this.beansQuantity += 1;
+                beansAmount -= 1;
+            }
+
+            if(beansAmount == 0 && this.type == holeType.MY_BASE)
+                return this.index
+
+            console.log(this.beansQuantity + ' - '+ beansAmount + ' - '+ this.type);
+
+            if(beansAmount == 0) {
+                return this.index
+            }
+
+            return this.nextHole.fowardBeans(beansAmount);
         }
-      }
+
+        return this.index
+    }
   
-      move() {
+    move() {
         let beansAmount = this.beansQuantity;
         this.beansQuantity = 0;
-  
-        this.nextHole.fowardBeans(beansAmount);
-      }
+
+        return this.nextHole.fowardBeans(beansAmount);
+    }
+
+    setType(type) {
+        this.type = type
+    }
+
+    getBase(holeIndex) {
+        return (holeIndex < 6) ? 6 : 13
+    }
+
+    getOponentBase(holeIndex) {
+        return (holeIndex < 6) ? 13 : 6
+    }
+
   }

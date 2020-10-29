@@ -14,10 +14,14 @@
   "main": "background.js",
   "dependencies": {
     "core-js": "^3.6.5",
+    "nanoid": "^3.1.16",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.1",
     "vue": "^2.6.11",
-    "vue-socket.io": "^3.0.10"
+    "vue-material": "^1.0.0-beta-15",
+    "vue-router": "^3.4.8",
+    "vue-socket.io": "^3.0.10",
+    "vue-toasted": "^1.1.28"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

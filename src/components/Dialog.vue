@@ -1,34 +1,26 @@
 <template>
-    <div class="chat">
-        <div class="chatArea">
-            <ul class="messages">
-                <li class="log"
-                    v-for="message in messages"
-                    v-bind:key="message.message">
-                    <div style="margin-bottom: 3px">
-                    <span style="font-size: 12px; margin-right: 5px; color: #888"> {{ message.date }} </span>
-                    <b>{{ message.user }}:</b> {{ message.message }}
-                    </div>
+   <md-dialog :md-active.sync="restartDialog" class="dialog">
+            <md-dialog-title style="text-align: center">Reiniciar</md-dialog-title>
 
-                </li>
-            </ul>
-        </div>
-        <div class="toSend">
-            <md-field>
-                <md-textarea v-model="toSend" md-autogrow></md-textarea>
-            </md-field>
+            <slot></slot>
 
-            <md-button class="md-primary" @click="sendMessage">Enviar</md-button>
-        </div>
-    </div>
+            <md-dialog-actions>
+                <md-button class="md-primary" @click="restartDialog = false"
+                    >Cancelar</md-button
+                >
+                <md-button class="md-primary" @click="restartGame()"
+                    >Reiniciar</md-button
+                >
+        </md-dialog-actions>
+    </md-dialog>
 </template>
 
 <script>
 export default {
     name: "Chat",
     props: {
-        username: String,
-        roomId: String,
+        title: String,
+        action: String,
     },
     data() {
         return {
@@ -39,10 +31,9 @@ export default {
     },
     methods: {
         sendMessage: function () {
-            if (this.toSend !== ''){
-                const data = { "user": this.username, "message": this.toSend, "roomId": this.roomId }
-                this.$socket.emit("message", data);
-            }            
+            const data = { "user": this.username, "message": this.toSend, "roomId": this.roomId }
+            this.$socket.emit("message", data);
+            
         },
     },
     created() {
@@ -64,7 +55,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: rgb(230, 230, 230);
+    background-color: rgb(221, 221, 221);
 }
 
 .toSend {
