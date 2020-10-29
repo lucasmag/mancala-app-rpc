@@ -1,22 +1,28 @@
 <template>
-    <div>
+    <div class="main">
+        <h1 style="padding: 50px 0">Mancala</h1>
+
+        <div class="options">
+            <md-button class="md-primary md-raised button" @click="showCreateRoomDialog()">Criar sala</md-button>
+            <md-button class="md-primary md-raised button" @click="showEnterRoomDialog()">Entrar em sala</md-button>
+        </div>
+
         <!-- CREATE NEW ROOM-->
         <md-dialog :md-active.sync="createRoomDialog" class="dialog">
-            <md-dialog-title>Criar nova sala</md-dialog-title>
+            <md-dialog-title style="text-align: center">Criar nova sala</md-dialog-title>
 
-            <h3>{{this.roomId}}</h3>
+            <h3 style="text-align: center">{{this.roomId}}</h3>
 
             <md-field>
                 <label>Nome de usuário</label>
                 <md-input v-model="username"></md-input>
-                <span class="md-helper-text">username</span>
             </md-field>
 
             <md-dialog-actions>
                 <md-button class="md-primary" @click="createRoomDialog = false"
                     >Cancelar</md-button
                 >
-                <md-button class="md-primary" @click="enterGame()"
+                <md-button class="md-primary" @click="createAndEnterGame()"
                     >Criar</md-button
                 >
             </md-dialog-actions>
@@ -30,14 +36,12 @@
             <md-field>
                 <label>Código da sala</label>
                 <md-input v-model="roomId" @change="verifyRoom"></md-input>
-                <span class="md-helper-text">username</span>
             </md-field>
-            <span v-if="!roomExists" class="warning">Sala não existe!</span>
+            <span v-if="!roomExists && this.roomId" class="warning">Sala não existe!</span>
 
             <md-field>
                 <label>Nome de usuário</label>
                 <md-input v-model="username"></md-input>
-                <span class="md-helper-text">username</span>
             </md-field>
 
             <md-dialog-actions>
@@ -45,10 +49,7 @@
                 <md-button class="md-primary" @click="enterGame()">Entrar</md-button>
             </md-dialog-actions>
         </md-dialog>
-
-        <md-button class="md-primary md-raised" @click="createRoom()">Criar sala</md-button>
-        <md-button class="md-primary md-raised" @click="enterRoom()">Entrar em sala</md-button>
-    </div>
+        </div>
 </template>
 
 <script>
@@ -69,28 +70,39 @@ export default {
         };
     },
     methods: {
-        createRoom: function () {
+        showCreateRoomDialog: function () {
             this.createRoomDialog = true
             this.roomId = nanoid()
-            this.isHost = true
-            this.$socket.emit('createRoom', this.roomId)
         },
-        enterRoom: function () {
+        showEnterRoomDialog: function () {
             this.enterRoomDialog = true;
         },
+        createAndEnterGame: function() {
+            this.isHost = true
+
+            this.$socket.emit('createRoom', this.roomId)
+            this.$socket.emit('enterRoom', {'roomId': this.roomId, 'player':this.username})
+
+            this.$router.push({name: 'game', params: { username: this.username, roomId: this.roomId, isHost: this.isHost}});
+        },
         enterGame: function () {
-            if (this.roomExists)
-                this.$router.push({name: 'game', params: { username: this.username, roomId: this.roomId, isHost: this.isHost}});
+            if (this.roomExists) {
+                console.log('tomar no cu');
+                this.$socket.emit('enterRoom', {'roomId': this.roomId, 'player':this.username})
+                this.$router.push({name: 'game', params: { 'username': this.username, roomId: this.roomId, isHost: this.isHost}});
+            }
         },
         verifyRoom: function() {
-            console.log('changed');
             this.$socket.emit('roomExists', this.roomId)
         }
     },
         sockets: {
-            roomExists(data) {
-                this.roomExists = data
+            roomExists(exists) {
+                this.roomExists = exists
             },
+            roomIsFull(roomId) {
+                console.log(roomId + ' sala tá cheia');
+            }
 
     },
 };
@@ -98,47 +110,21 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.chat {
-    width: 500px;
+.main {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-
-    background-color: moccasin;
+    align-items: center;
 }
 
-.message {
-    padding: 0 5px;
-    display: flex;
-    gap: 4px;
-}
-
-.messages {
-    height: 100%;
-    margin: 0;
-    overflow-y: scroll;
-    padding: 20px;
-}
-
-.input-message {
-    margin: 0;
-    resize: none;
-    width: 100%;
-}
-
-.chatArea {
-    height: 100%;
-    padding-bottom: 60px;
-}
-
-.log {
-    margin: 5px;
-    text-align: start;
-}
-
-ul {
-    list-style: none;
-    overflow-wrap: break-word;
+.options {
+    position: absolute;
+padding: 0;
+  height:-webkit-fill-available;
+  width: 300px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
 
 
@@ -150,5 +136,9 @@ ul {
 .warning {
     color: rgb(185, 73, 73);
     font-style: oblique;
+}
+
+.button {
+    margin: 0px;
 }
 </style>

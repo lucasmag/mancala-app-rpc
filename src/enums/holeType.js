@@ -1,5 +1,6 @@
 export const holeType = Object.freeze({
-    "ORDINARY": "ordinary", 
+    "MY_HOLE": "myHole",
+    "OPONENT_HOLE": "oponentHole",
     "OPONENT_BASE": "oponentBase", 
     "MY_BASE": "myBase"
 })

@@ -1,6 +1,7 @@
 <template>
-    <div>
+    <div class="background">
         <h3 v-if="!this.readyToPlay">Aguardando jogador... sala: {{this.roomId}}</h3>
+
         <div class="board" v-if="this.readyToPlay">
             <Bean/>
             <div class="grid-container">
@@ -13,12 +14,54 @@
                 </div>
             </div>
         </div>
+
+        <div v-if="this.readyToPlay" class="options">
+            <md-button class="md-primary button" @click="restartDialog = true">Reiniciar partida</md-button>
+            <md-button class="md-accent button" @click="giveUpDialog = true">Desistir</md-button>
+        </div>
+
+        <!-- GIVE UP GAME -->
+        <md-dialog :md-active.sync="giveUpDialog" class="dialog">
+            <md-dialog-title style="text-align: center">Desistir</md-dialog-title>
+
+            <h3 style="text-align: center; margin: 30px 0">Deseja mesmo desistir da partida?</h3>
+
+
+            <md-dialog-actions>
+                <md-button class="md-primary" @click="giveUpDialog = false"
+                    >Cancelar</md-button
+                >
+                <md-button class="md-primary" @click="giveUpGame()"
+                    >Desistir</md-button
+                >
+            </md-dialog-actions>
+        </md-dialog>
+
+
+        <!-- RESTART GAME -->
+        <md-dialog :md-active.sync="restartDialog" class="dialog">
+            <md-dialog-title style="text-align: center">Reiniciar</md-dialog-title>
+
+            <h3 style="text-align: center; margin: 30px 0">Deseja mesmo reiniciar a partida?</h3>
+            <!-- <h2><b>{{this.oponent}}</b> deverá confirmar essa ação</h2> -->
+
+
+            <md-dialog-actions>
+                <md-button class="md-primary" @click="restartDialog = false"
+                    >Cancelar</md-button
+                >
+                <md-button class="md-primary" @click="restartGame()"
+                    >Reiniciar</md-button
+                >
+            </md-dialog-actions>
+        </md-dialog>
     </div>
 </template>
 
 <script>
 import Hole from "./Hole.vue";
 import Bean from "./Bean.vue";
+import { action } from '../enums/action.js' 
 
 
 export default {
@@ -27,28 +70,33 @@ export default {
         Hole,
         Bean
     },
-    props: ['isHost', 'roomId'],
+    props: ['isHost', 'roomId', 'player'],
     data() {
         return {
             holes: [
                 {"class": "zero", "isBase": false },
-                 {"class": "one", "isBase": false },
-                 {"class": "two", "isBase": false },
-                 {"class": "three", "isBase": false },
-                 {"class": "four", "isBase": false },
-                 {"class": "five", "isBase": false },
-                 {"class": "six", "isBase": true },
-                 {"class": "seven", "isBase": false },
-                 {"class": "eight", "isBase": false },
-                 {"class": "nine", "isBase": false },
-                 {"class": "ten", "isBase": false },
-                 {"class": "eleven", "isBase": false },
-                 {"class": "twelve", "isBase": false },
-                 {"class": "thirteen", "isBase": true },
+                {"class": "one", "isBase": false },
+                {"class": "two", "isBase": false },
+                {"class": "three", "isBase": false },
+                {"class": "four", "isBase": false },
+                {"class": "five", "isBase": false },
+                {"class": "six", "isBase": true },
+                {"class": "seven", "isBase": false },
+                {"class": "eight", "isBase": false },
+                {"class": "nine", "isBase": false },
+                {"class": "ten", "isBase": false },
+                {"class": "eleven", "isBase": false },
+                {"class": "twelve", "isBase": false },
+                {"class": "thirteen", "isBase": true },
             ],
             gameState: [],
             myTurn: this.isHost,
-            readyToPlay: false
+            readyToPlay: false,
+            giveUp: false,
+            endGame: false,
+            oponent: String,
+            giveUpDialog: false,
+            restartDialog: false
         };
     },
     methods: {
@@ -65,19 +113,52 @@ export default {
                 // TODO Show that is not my turn
             }
                 
+        },
+        showMessage: function(msg){
+            this.$toasted.show(msg, { 
+                theme: "bubble", 
+                position: "top-center", 
+                duration : 10000
+            });
+        },
+        restartGame: function() {
+            this.restartDialog = false
+            this.$socket.emit('restartGame', this.roomId)
+        },
+        giveUpGame: function() {
+            this.giveUp = true
+            this.giveUpDialog = false
+            this.$socket.emit('giveUpGame', this.roomId)
         }
     },
-    created() {
-        console.log('mancala criado');
-        this.$socket.emit("joinGame", this.roomId);
-    },
     sockets: {
-
-
         updateState(data) {
-            console.log(data.gameState + ' - ' + data.playAgain);
-            if (!data.playAgain)
-                this.myTurn = !this.myTurn
+            console.log(data.gameState + ' - ' + data.action);
+
+            switch (data.action) {
+                case action.CHANGE_TURN:
+                     this.myTurn = !this.myTurn
+                     break;
+
+                case action.END_GAME:
+                    if (this.myTurn)
+                        this.showMessage('Você venceu!')
+                    else
+                        this.showMessage(this.oponent + ' venceu')
+                    break;
+                
+                case action.RESTART:
+                    this.showMessage('Jogo reiniciado')
+                    break;
+
+                case action.GIVE_UP:
+                    if (!this.giveUp)
+                        this.showMessage(this.oponent + 
+                        ' desistiu da partida. Você venceu!')
+                    else
+                        this.showMessage(this.oponent + ' venceu')
+                    break;
+            }
             
             this.gameState = data.gameState
         },
@@ -85,7 +166,12 @@ export default {
         startGame(data) {
             this.readyToPlay = true
             console.log(data);
-            this.gameState = data
+            this.gameState = data.gameState
+            this.oponent = data.players.filter(p => p != this.player)
+
+            let start = this.isHost ? 'Você' : this.oponent
+
+            this.showMessage(start + ' começa!')
         }
 
     },
@@ -96,7 +182,7 @@ export default {
 .board {
     width: 100%;
     height: 30vw;
-    background-color: bisque;
+    background-color: rgb(221, 221, 221);
     padding: 20px;
       display: flex;
   justify-content: center;
@@ -121,9 +207,22 @@ export default {
 .base1, .base2 {
     width: 8vw;
     height: 16vw;
-    background-color:burlywood;
+    background-color:rgb(233, 233, 233);
     margin: 10px;
     border-radius: 30px
+}
+
+.background {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(221, 221, 221);
+    height: 100vh;
+}
+
+.options {
+    margin-top: 50px;
 }
 
 .grid-container {
@@ -150,4 +249,8 @@ export default {
 .ten { grid-area: ten; }
 .eleven { grid-area: eleven; }
 
+.md-dialog /deep/.md-dialog-container {
+    max-width: 768px;
+    padding: 30px
+}
 </style>

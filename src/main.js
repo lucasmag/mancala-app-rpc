@@ -5,9 +5,13 @@ import Game from './pages/Game'
 import Home from './pages/Home'
 import * as io from "socket.io-client";
 import VueSocketIO from "vue-socket.io";
-import { MdDialog, MdButton, MdField} from 'vue-material/dist/components'
+import { MdDialog, MdButton, MdField } from 'vue-material/dist/components'
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default.css'
+import Toasted from 'vue-toasted';
+
+
+Vue.use(Toasted)
 
 Vue.use(MdButton)
 Vue.use(MdDialog)

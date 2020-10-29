@@ -1,7 +1,7 @@
 <template>
   <div class="base">
-      <Mancala :isHost="isHost" :roomId="roomId"></Mancala>
-      <Chat :username="username" :roomId="roomId"></Chat>
+      <Mancala class="mancala" :isHost="isHost" :roomId="roomId" :player="username"></Mancala>
+      <Chat class="chat" :username="username" :roomId="roomId"></Chat>
   </div>
 </template>
 
@@ -21,8 +21,18 @@ export default {
 </script>
 
 <style scoped>
+.mancala {
+    width: -webkit-fill-available;
+}
   .base {
+    align-items: center;
     display: flex;
+    width: 100%;
+    height: 100%;
   } 
+
+  .chat {
+      height: -webkit-fill-available;
+  }
 
 </style>

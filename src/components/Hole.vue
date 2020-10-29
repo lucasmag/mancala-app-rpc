@@ -35,7 +35,7 @@ export default {
 .normalHole {
     width: 8vw;
     height: 8vw;
-    background-color: burlywood;
+    background-color: rgb(187, 187, 187);
     margin: 10px;
     border-radius: 30px;
 }
@@ -43,7 +43,7 @@ export default {
 .baseHole {
     width: 8vw;
     height: 16vw;
-    background-color: burlywood;
+    background-color: rgb(135, 222, 150);
     margin: 10px;
     border-radius: 30px;
 }
