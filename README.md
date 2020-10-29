@@ -1,24 +1,16 @@
 # mancala-app
 
-## Project setup
+## Setup do projeto
 ```
-yarn install
-```
-
-### Compiles and hot-reloads for development
-```
-yarn serve
+npm install
 ```
 
-### Compiles and minifies for production
+### Compilar e executar como desenvolvimento
 ```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
+npm run electron:serve
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Compilar e minificar para produção
+```
+npm run electron:build
+```
