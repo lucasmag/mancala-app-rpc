@@ -21,7 +21,7 @@ export class Board {
             'action': action,
         }
     }
-
+    // And this folks, is what i call XGH
     nextAction(holeIndex){
 
         let indexOfLastHole = this.holes[holeIndex].move(holeIndex)
