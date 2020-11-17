@@ -70,7 +70,7 @@ export default {
     components: {
         Hole,
     },
-    props: ['isHost', 'roomId', 'player'],
+    props: ['isHost', 'player'],
     data() {
         return {
             holes: [

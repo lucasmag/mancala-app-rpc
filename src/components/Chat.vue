@@ -27,8 +27,7 @@
 export default {
     name: "Chat",
     props: {
-        username: String,
-        roomId: String,
+        username: String
     },
     data() {
         return {

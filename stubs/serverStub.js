@@ -8,15 +8,14 @@ const clientpackageDef = protoLoader.loadSync("client.proto", {})
 const grpcClientObject = grpc.loadPackageDefinition(clientpackageDef)
 const clientpackage = grpcClientObject.clientpackage
 
-import { Board } from "../models/Board"
-import { action } from '../enums/action.js' 
+const Board = require("../src/models/Board")
 
 
 let room = []
 let board = {}
 let clients = []
 
-export function createServer(serverAdress) {
+function createServer(serverAdress) {
     if (serverAdress) {
 
         const server = new grpc.Server();
@@ -43,7 +42,8 @@ export function createServer(serverAdress) {
 
 
 function createRoom() {
-    let newBoard = new Board()
+    let newBoard = Board
+    newBoard.toInitialState()
 
     room = {
         'players': [], 
@@ -58,14 +58,10 @@ function createRoom() {
 function newClient(call, callback) {
     console.log("Client trying to connect: " + call)
     // const client = new clientpackage.client(address, grpc.credentials.createInsecure())
-    clients.push(call)
+    clients.push(client)
 
-    let gameData = {
-        "gameState": board.getState(),
-        "action": action.PLAY_AGAIN
-    }
 
-    callback(null, gameData)
+    callback(null, {"connected": true})
 }
 
 function sendMessage(Message) {
@@ -87,3 +83,6 @@ function restartGame(None) {
 function giveUpGame(None) {
 
 }
+
+
+module.exports = { createServer }

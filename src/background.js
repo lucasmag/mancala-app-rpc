@@ -1,13 +1,19 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 
+let server = require('./server')
+
+ipcMain.on('startServer', (event, arg) => {
+    server.createServer(arg)
+
+    event.returnValue = 'yayy'
+  })
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-console.log('>>>>>>>> Initializing socket server... <<<<<<<<<');
-require('./server');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -18,14 +24,6 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
-process.on('uncaughtException', function(err) {
-  if(err.errno === 'EADDRINUSE') 
-       console.log('Mancala server already started! Skipping...');
-  else {
-       console.log(err);
-       process.exit(1);
-  }
-});
 
 function createWindow() {
   // Create the browser window.
