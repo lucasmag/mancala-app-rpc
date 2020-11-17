@@ -30,7 +30,6 @@ export function createServer(serverAdress) {
                 "getMessages": getMessages,
                 "restartGame": restartGame,
                 "giveUpGame": giveUpGame,
-                "newClient": newClient,
             });
     
         server.start()
@@ -56,9 +55,11 @@ function createRoom() {
 }
 
 function newClient(call, callback) {
-    console.log("Client trying to connect: " + call)
-    // const client = new clientpackage.client(address, grpc.credentials.createInsecure())
-    clients.push(call)
+    console.log("Client trying to connect: " + call.request.address)
+
+    let client = new clientpackage.Client(call.request["address"], grpc.credentials.createInsecure())
+    clients.push(client)
+    console.log(clients);
 
     let gameData = {
         "gameState": board.getState(),

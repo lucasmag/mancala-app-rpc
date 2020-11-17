@@ -5,12 +5,13 @@
         <div class="options">
             <md-field>
                 <label>Endereço do servidor</label>
-                <md-input v-model="serverAddress" placeholder="localhost:40000" @change="verifyAddress"></md-input>
+                <md-input v-model="serverAddress" placeholder="localhost:40000"></md-input>
             </md-field>
+            <md-button class="md-primary md-raised button" @click="startServer()">Criar servidor</md-button>
 
             <md-field>
                 <label>Endereço desde jogo</label>
-                <md-input v-model="clientAddress" placeholder="Digite o endereço desde cliente" @change="verifyAddress"></md-input>
+                <md-input v-model="clientAddress" placeholder="Digite o endereço desde cliente" ></md-input>
             </md-field>
 
             <md-field>
@@ -38,23 +39,23 @@ export default {
         };
     },
     methods: {
+        startServer: function () {
+            this.isHost = true
+            console.log("ehhehehehe")
+            // this.$server.createServer(this.serverAddress)
+            this.$server.sendSync('startServer', this.serverAddress)
+        },
         startGame: function () {
 
             //Cria clientServer
             const clientStub = this.$clientStub
+            console.log("cliente: " + this.clientAddress)
             clientStub.createClientServer(this.clientAddress)
 
-            //Cria servidor do jogo
-            if (this.serverAddress) {
-                this.isHost = true
-
-                // this.$server.createServer(this.serverAddress)
-                console.log(this.$server.sendSync('startServer', this.serverAddress))
-            }
-
-            let conn = clientStub.getServerConnection(this.serverAddress)
+            const conn = clientStub.getServerConnection(this.serverAddress)
 
             conn.newClient({"address": this.clientAddress }, (err, response) => {
+                console.log(err)
                 console.log("Dados do jogo: " + JSON.stringify(response));
             })
 
