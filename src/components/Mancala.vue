@@ -1,7 +1,6 @@
 <template>
     <div class="background">
         <h3 v-if="!this.readyToPlay">Aguardando jogador...</h3> 
-        <h1 v-if="!this.readyToPlay">sala: {{this.roomId}}</h1>
         <h1 v-if="this.readyToPlay" style="color: #BBB;">
             {{this.myTurn ? 'Sua vez' : 'Vez de ' + this.oponent}}
         </h1>
@@ -98,6 +97,7 @@ export default {
             giveUpDialog: false,
             restartDialog: false,
         };
+    
     },
     methods: {
         moveBean: function() {

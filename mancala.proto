@@ -3,8 +3,7 @@ syntax = "proto3";
 package mancalapackage;
 
 service Mancala {
-    rpc createRoom(None) returns (Ok);
-    rpc sendMessage(Message) returns (Message);
+    rpc sendMessage(Message) returns (None);
     rpc makeMove(Hole) returns (GameData);
     rpc getMessages(None) returns (AllMessages);
     rpc restartGame(None) returns (GameData);
@@ -21,11 +20,16 @@ message Ok {
 message Message {
     string user = 1;
     string message = 2;
+}
+
+message MessageResponse {
+    string user = 1;
+    string message = 2;
     string date = 3;
 }
 
 message AllMessages {
-    repeated Message messages = 1;
+    repeated MessageResponse messages = 1;
 }
 
 message Hole {
@@ -39,4 +43,5 @@ message GameData {
 
 message Address {
     string address = 1;
+    string username = 2;
 }

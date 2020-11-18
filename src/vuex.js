@@ -5,15 +5,15 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
     state: {
-        gameState: [],
+        gameData: [],
         messages: []
     },
     mutations: {
         setGameState(state, payload) {
-            state.gameState = payload.gameState
+            state.gameData = payload
         },
         setMessages(state, payload) {
-            state.messages = payload.messages
+            state.messages = payload
         }
     }
 })

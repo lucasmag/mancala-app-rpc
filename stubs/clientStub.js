@@ -8,6 +8,7 @@ const clientpackageDef = protoLoader.loadSync("client.proto", {})
 const grpcClientObject = grpc.loadPackageDefinition(clientpackageDef)
 const clientpackage = grpcClientObject.clientpackage
 
+const window = require('electron-main-window').getMainWindow();
 
 function createClientServer(clientHost) {
     console.log("Tentando criar clientServer: " + clientHost);
@@ -15,23 +16,29 @@ function createClientServer(clientHost) {
     server.bind(clientHost, grpc.ServerCredentials.createInsecure())
     server.addService(clientpackage.Client.service,
         {
-            "updateGameData": updateGameData,
-            "updateMessages": updateMessages,
+            "sendGameData": sendGameData,
+            "broadcastMessages": broadcastMessages,
+            "startGame": startGame
         });
 
     server.start()
     console.log("gRPC clientHost started! Serving at " + clientHost);
 }
 
-function updateGameData(call, callback) {
-    console.log(call)
-
+function sendGameData(call, callback) {
+    window.webContents.send('gameData', call.request)
     callback(null, {})
 }
 
-function updateMessages(call, callback) {
-    console.log(call)
+function broadcastMessages(call, callback) {
+    console.log("calling");
+    console.log(callback.request);
+    window.webContents.send('messages', call.request.messages)
+    callback(null, {})
+}
 
+function startGame(call, callback) {
+    window.webContents.send('startGame', call.request)
     callback(null, {})
 }
 

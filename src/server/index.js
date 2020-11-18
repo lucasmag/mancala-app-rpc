@@ -13,7 +13,8 @@ import { action } from '../enums/action.js'
 
 
 let room = []
-let board = {}
+let messages = []
+let players = []
 let clients = []
 
 export function createServer(serverAdress) {
@@ -24,7 +25,6 @@ export function createServer(serverAdress) {
         server.addService(mancalaPackage.Mancala.service,
             {
                 "newClient": newClient,
-                "createRoom": createRoom,
                 "sendMessage": sendMessage,
                 "makeMove": makeMove,
                 "getMessages": getMessages,
@@ -33,7 +33,6 @@ export function createServer(serverAdress) {
             });
     
         server.start()
-        createRoom()
         console.log("gRPC server started!")
     }
 }
@@ -41,44 +40,59 @@ export function createServer(serverAdress) {
 //===============================================================
 
 
-function createRoom() {
-    let newBoard = new Board()
-
-    room = {
-        'players': [], 
-        'messages': [], 
-        'gameState': newBoard.getState()
-    }
-    console.log(room);
-
-    board = newBoard
-}
-
 function newClient(call, callback) {
     console.log("Client trying to connect: " + call.request.address)
 
     let client = new clientpackage.Client(call.request["address"], grpc.credentials.createInsecure())
+
     clients.push(client)
-    console.log(clients);
+    players.push(call.request["username"])
 
-    let gameData = {
-        "gameState": board.getState(),
-        "action": action.PLAY_AGAIN
-    }
+    // if (clients.length == 2) {
+    //     let board = new Board()
 
-    callback(null, gameData)
+    //     room = {
+    //         'players': players, 
+    //         'messages': messages, 
+    //         'gameState': board.getState()
+    //     }
+    
+    //     clients.forEach(client => {
+    //         client.sendMessages({"startGame": room} , (err, response) => {
+    //             console.log(err)
+    //         })
+    //     });
+    // }
 }
 
-function sendMessage(Message) {
+function getDate(){
+    let d = new Date()
+    let datestring = ("0" + d.getDate()).slice(-2) + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" +
+    d.getFullYear() + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
     
+    return datestring
+}
+
+function sendMessage(call, callback) {
+    messages.push({
+        'user': call.request.user, 
+        'message': call.request.message,
+        'date': getDate()
+    }) 
+
+    clients.forEach(client => {
+        client.broadcastMessages({"messages": messages} , (err, response) => {
+            console.log(err)
+        })
+    });
 }
 
 function makeMove(Hole) {
 
 }
 
-function getMessages(None) {
-
+function getMessages(call, callback) {
+    callback(null, {"messages": messages})
 }
 
 function restartGame(None) {

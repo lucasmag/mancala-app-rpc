@@ -3,11 +3,11 @@
         <h1 style="padding: 50px 0">Mancala</h1>
 
         <div class="options">
+            <md-switch v-model="createServer">Criar servidor</md-switch>
             <md-field>
                 <label>Endereço do servidor</label>
                 <md-input v-model="serverAddress" placeholder="localhost:40000"></md-input>
             </md-field>
-            <md-button class="md-primary md-raised button" @click="startServer()">Criar servidor</md-button>
 
             <md-field>
                 <label>Endereço desde jogo</label>
@@ -26,7 +26,6 @@
 </template>
 
 <script>
-
 export default {
     name: "Home",
     data() {
@@ -35,34 +34,35 @@ export default {
             addressExists: false,
             serverAddress: 'localhost:40000',
             clientAddress: '',
-            username: ''
+            username: '',
+            createServer: true,
         };
     },
     methods: {
-        startServer: function () {
-            this.isHost = true
-            console.log("ehhehehehe")
-            // this.$server.createServer(this.serverAddress)
-            this.$server.sendSync('startServer', this.serverAddress)
-        },
         startGame: function () {
+
+            if (this.createServer) {
+                this.isHost = true
+                // this.$server.createServer(this.serverAddress)
+                this.$server.sendSync('startServer', this.serverAddress)
+            }
 
             //Cria clientServer
             const clientStub = this.$clientStub
-            console.log("cliente: " + this.clientAddress)
             clientStub.createClientServer(this.clientAddress)
 
             const conn = clientStub.getServerConnection(this.serverAddress)
+            this.$server = conn
 
             conn.newClient({"address": this.clientAddress }, (err, response) => {
-                console.log(err)
                 console.log("Dados do jogo: " + JSON.stringify(response));
             })
 
             // if (this.roomExists) {
             //     this.$socket.emit('enterRoom', {'roomId': this.roomId, 'player':this.username})
-            //     this.$router.push({name: 'game', params: { 'username': this.username, isHost: this.isHost}});
+            //     
             // }
+            this.$router.push({name: 'game', params: { 'username': this.username, 'isHost': this.isHost, 'conn': conn}});
         },
         verifyAdress: function() {
             this.addressExists = true

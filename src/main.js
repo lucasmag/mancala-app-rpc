@@ -5,7 +5,7 @@ import Game from './pages/Game'
 import Home from './pages/Home'
 import * as io from "socket.io-client";
 import VueSocketIO from "vue-socket.io";
-import { MdDialog, MdButton, MdField, MdCheckbox } from 'vue-material/dist/components'
+import { MdDialog, MdButton, MdField, MdSwitch } from 'vue-material/dist/components'
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default.css'
 import Toasted from 'vue-toasted';
@@ -26,7 +26,7 @@ Vue.use(Toasted)
 Vue.use(MdButton)
 Vue.use(MdDialog)
 Vue.use(MdField)
-Vue.use(MdCheckbox)
+Vue.use(MdSwitch)
 Vue.use(
   new VueSocketIO({
     debug: true,
@@ -50,9 +50,24 @@ const router = new VueRouter({
 })
 
 
-new Vue({
+const vue = new Vue({
   el: '#app',
   router,
   store,
   render: h => h(App),
+})
+
+window.require('electron').ipcRenderer.on('messages', (event, message) => {
+    console.log("mensagenss");
+
+    vue.$emit("teste", "Só umteste boy hehehe")
+    store.commit("setMessages", message)
+})
+
+window.require('electron').ipcRenderer.on('gameState', (event, message) => {
+    store.commit("setGameState", message)
+})
+
+window.require('electron').ipcRenderer.on('startGame', (event, message) => {
+    store.commit("startGame", message)
 })

@@ -3,13 +3,20 @@ syntax = "proto3";
 package clientpackage;
 
 service Client {
-    rpc updateGameData(GameData) returns (None);
-    rpc updateMessages(AllMessages) returns (None);
+    rpc startGame(AllData) returns (None);
+    rpc updateState(GameData) returns (None);
+    rpc broadcastMessages(AllMessages) returns (None);
 }
 
 message GameData {
     repeated int32 gameState = 1;
     string action = 2;
+}
+
+message AllData {
+    repeated string players = 1;
+    repeated Message messages = 2;
+    repeated int32 gameState = 3;
 }
 
 message Message {
