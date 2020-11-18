@@ -62,6 +62,7 @@
 <script>
 import Hole from "./Hole.vue";
 import { action } from '../enums/action.js' 
+const ipc = window.require('electron').ipcRenderer
 
 
 export default {
@@ -69,7 +70,7 @@ export default {
     components: {
         Hole,
     },
-    props: ['isHost', 'player'],
+    props: ['isHost', 'player', 'conn'],
     data() {
         return {
             holes: [
@@ -100,22 +101,23 @@ export default {
     
     },
     methods: {
-        moveBean: function() {
-            const position = this.$refs.base1.getBoundingClientRect()
-            console.log(position);
-        },
         makeMove: function(holeIndex) {
-            const data = {"roomId": this.roomId, "holeIndex": holeIndex}
+            const data = {"holeIndex": holeIndex}
             if (this.gameState[holeIndex] > 0) {
                 if (this.isHost) {
                     if (holeIndex < 6) {
-                        if (this.myTurn)
-                            this.$socket.emit('makeMove', data)
+                        if (this.myTurn) {
+                            console.log(holeIndex)
+                            this.conn.makeMove(data, () => {})
+                        }
+                            
                     }
                 } else {
                     if (holeIndex > 6 && holeIndex < 13) {
-                        if (this.myTurn)
-                            this.$socket.emit('makeMove', data)
+                        if (this.myTurn){
+                            console.log(holeIndex)
+                            this.conn.makeMove(data, () => {})
+                        }
                     }
                 }
             }
@@ -130,18 +132,26 @@ export default {
         },
         restartGame: function() {
             this.restartDialog = false
-            this.$socket.emit('restartGame', this.roomId)
+            this.conn.restartGame({}, () => {})
         },
         giveUpGame: function() {
             this.giveUp = true
             this.giveUpDialog = false
-            this.$socket.emit('giveUpGame', this.roomId)
+            this.conn.giveUpGame({}, () => {})
         }
     },
-    sockets: {
-        updateState(data) {
-            console.log(data.gameState + ' - ' + data.action);
+    created() {
+        ipc.once('startGame', (event, data) => {
+            this.readyToPlay = true
+            this.gameState = data.gameState
+            this.oponent = data.players.filter(p => p != this.player)
 
+            let start = this.isHost ? 'Você' : this.oponent
+
+            this.showMessage(start + ' começa!')
+        })
+
+        ipc.on('updateState', (event, data) => {
             switch (data.action) {
                 case action.CHANGE_TURN:
                      this.myTurn = !this.myTurn
@@ -168,19 +178,7 @@ export default {
             }
             
             this.gameState = data.gameState
-        },
-
-        startGame(data) {
-            this.readyToPlay = true
-            console.log(data);
-            this.gameState = data.gameState
-            this.oponent = data.players.filter(p => p != this.player)
-
-            let start = this.isHost ? 'Você' : this.oponent
-
-            this.showMessage(start + ' começa!')
-        }
-
+        })
     },
 };
 </script>

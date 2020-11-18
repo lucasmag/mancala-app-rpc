@@ -11,6 +11,7 @@ const clientpackage = grpcClientObject.clientpackage
 import { Board } from "../models/Board"
 import { action } from '../enums/action.js' 
 
+let board = new Board()
 
 let room = []
 let messages = []
@@ -41,28 +42,24 @@ export function createServer(serverAdress) {
 
 
 function newClient(call, callback) {
-    console.log("Client trying to connect: " + call.request.address)
 
     let client = new clientpackage.Client(call.request["address"], grpc.credentials.createInsecure())
 
     clients.push(client)
-    players.push(call.request["username"])
+    players.push(call.request.username)
 
-    // if (clients.length == 2) {
-    //     let board = new Board()
+    if (clients.length == 2) {
 
-    //     room = {
-    //         'players': players, 
-    //         'messages': messages, 
-    //         'gameState': board.getState()
-    //     }
+        room = {
+            'players': players, 
+            'messages': messages, 
+            'gameState': board.getState()
+        }
     
-    //     clients.forEach(client => {
-    //         client.sendMessages({"startGame": room} , (err, response) => {
-    //             console.log(err)
-    //         })
-    //     });
-    // }
+        clients.forEach(client => {
+            client.startGame(room , () => {})
+        });
+    }
 }
 
 function getDate(){
@@ -74,6 +71,7 @@ function getDate(){
 }
 
 function sendMessage(call, callback) {
+    console.log(call);
     messages.push({
         'user': call.request.user, 
         'message': call.request.message,
@@ -81,24 +79,42 @@ function sendMessage(call, callback) {
     }) 
 
     clients.forEach(client => {
-        client.broadcastMessages({"messages": messages} , (err, response) => {
-            console.log(err)
-        })
+        client.broadcastMessages({"messages": messages} , () => {})
     });
 }
 
-function makeMove(Hole) {
-
+function makeMove(call, callback) {
+    let result = board.makeMove(call.request.holeIndex)
+    
+    clients.forEach(client => {
+        client.updateState(result , () => {})
+    });
 }
 
 function getMessages(call, callback) {
     callback(null, {"messages": messages})
 }
 
-function restartGame(None) {
+function restartGame(call, callback) {
 
+    let result = {
+        'gameState': board.toInitialState(),
+        'action': action.RESTART,
+    }
+
+    clients.forEach(client => {
+        client.updateState(result , () => {})
+    });
 }
 
-function giveUpGame(None) {
+function giveUpGame(call, callback) {
 
+    let result = {
+        'gameState': board.toInitialState(),
+        'action': action.GIVE_UP,
+    }
+
+    clients.forEach(client => {
+        client.updateState(result , () => {})
+    })
 }

@@ -16,7 +16,7 @@ function createClientServer(clientHost) {
     server.bind(clientHost, grpc.ServerCredentials.createInsecure())
     server.addService(clientpackage.Client.service,
         {
-            "sendGameData": sendGameData,
+            "updateState": updateState,
             "broadcastMessages": broadcastMessages,
             "startGame": startGame
         });
@@ -25,14 +25,12 @@ function createClientServer(clientHost) {
     console.log("gRPC clientHost started! Serving at " + clientHost);
 }
 
-function sendGameData(call, callback) {
-    window.webContents.send('gameData', call.request)
+function updateState(call, callback) {
+    window.webContents.send('updateState', call.request)
     callback(null, {})
 }
 
 function broadcastMessages(call, callback) {
-    console.log("calling");
-    console.log(callback.request);
     window.webContents.send('messages', call.request.messages)
     callback(null, {})
 }
@@ -43,9 +41,7 @@ function startGame(call, callback) {
 }
 
 function getServerConnection(serverHost) {
-
     const server = new mancalaPackage.Mancala(serverHost, grpc.credentials.createInsecure())
-
     return server
 }
 

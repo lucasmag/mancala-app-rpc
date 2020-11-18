@@ -9,12 +9,11 @@ import { MdDialog, MdButton, MdField, MdSwitch } from 'vue-material/dist/compone
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default.css'
 import Toasted from 'vue-toasted';
-import { store } from './vuex'
 
 const { ipcRenderer, remote } = window.require('electron');
 
 const clientStub = remote.require('../stubs/clientStub')
-let server = ipcRenderer
+const server = ipcRenderer
 
 var tcpPortUsed =  window.require("electron").remote.require('tcp-port-used');
 
@@ -34,9 +33,7 @@ Vue.use(
   })
 );
 
-
 Vue.use(VueRouter)
-
 Vue.config.productionTip = false
 
 
@@ -46,28 +43,11 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  routes // short for `routes: routes`
+  routes
 })
 
-
-const vue = new Vue({
+new Vue({
   el: '#app',
   router,
-  store,
   render: h => h(App),
-})
-
-window.require('electron').ipcRenderer.on('messages', (event, message) => {
-    console.log("mensagenss");
-
-    vue.$emit("teste", "Só umteste boy hehehe")
-    store.commit("setMessages", message)
-})
-
-window.require('electron').ipcRenderer.on('gameState', (event, message) => {
-    store.commit("setGameState", message)
-})
-
-window.require('electron').ipcRenderer.on('startGame', (event, message) => {
-    store.commit("startGame", message)
 })

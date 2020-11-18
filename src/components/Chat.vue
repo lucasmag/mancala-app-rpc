@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex"
+const ipc = window.require('electron').ipcRenderer
 
 
 export default {
@@ -32,14 +32,10 @@ export default {
     props: ["username", "conn"],
     data() {
         return {
+            messages: [],
             toSend: "",
             isConnected: false,
         };
-    },
-    computed: {
-    ...mapState({
-            messages: state => state.messages
-        })
     },
     methods: {
         sendMessage: function () {
@@ -52,15 +48,15 @@ export default {
             }            
         },
     },
-    mounted() {
-        this.$on('teste', function(value) {
-            console.log("pqp mangggo kkkk")
-            console.log(value)
-        })
+    created() {
         this.conn.getMessages({}, (err, response) => {
-            console.log(response)
-            this.$store.commit("setMessages", response.messages)
+            this.messages = response.messages
         })
+
+        ipc.on('messages', (event, data) => {
+            this.messages = data
+        })
+
     },
 };
 </script>

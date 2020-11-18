@@ -54,7 +54,7 @@ export default {
             const conn = clientStub.getServerConnection(this.serverAddress)
             this.$server = conn
 
-            conn.newClient({"address": this.clientAddress }, (err, response) => {
+            conn.newClient({"address": this.clientAddress, "username": this.username}, (err, response) => {
                 console.log("Dados do jogo: " + JSON.stringify(response));
             })
 
