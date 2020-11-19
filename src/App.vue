@@ -11,8 +11,9 @@ export default {
 
 <style>
 #app {
-font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+font-family:'Haettenschweiler', 'Arial Narrow Bold', sans-serif;
   text-align: center;
   height: 100vh;
 }
+
 </style>
