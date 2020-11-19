@@ -21,8 +21,6 @@ export class Hole {
             if(beansAmount == 0 && this.type == holeType.MY_BASE)
                 return this.index
 
-            console.log(this.beansQuantity + ' - '+ beansAmount + ' - '+ this.type);
-
             if(beansAmount == 0) {
                 return this.index
             }

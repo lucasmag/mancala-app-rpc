@@ -13,7 +13,22 @@ import { action } from '../enums/action.js'
 
 let board = new Board()
 
-let room = []
+// Estrutura da sala
+// room: {
+//     players: [ 'Lucas', 'Ana' ],
+//     messages: [
+//         {'user': 'Lucas',
+//         'message: 'Olá!',
+//         'date: 2020-10-18 13:23:03'}
+//     ],
+//     gameState: [
+//       4, 4, 0, 5, 5, 5,
+//       1, 4, 4, 4, 4, 4,
+//       4, 0
+//     ]]
+// }
+
+let room = {}
 let messages = []
 let players = []
 let clients = []
@@ -39,7 +54,6 @@ export function createServer(serverAdress) {
 }
 
 //===============================================================
-
 
 function newClient(call, callback) {
 
@@ -71,12 +85,12 @@ function getDate(){
 }
 
 function sendMessage(call, callback) {
-    console.log(call);
     messages.push({
         'user': call.request.user, 
         'message': call.request.message,
         'date': getDate()
     }) 
+    console.log(call);
 
     clients.forEach(client => {
         client.broadcastMessages({"messages": messages} , () => {})

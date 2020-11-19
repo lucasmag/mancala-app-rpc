@@ -107,7 +107,6 @@ export default {
                 if (this.isHost) {
                     if (holeIndex < 6) {
                         if (this.myTurn) {
-                            console.log(holeIndex)
                             this.conn.makeMove(data, () => {})
                         }
                             
@@ -115,7 +114,6 @@ export default {
                 } else {
                     if (holeIndex > 6 && holeIndex < 13) {
                         if (this.myTurn){
-                            console.log(holeIndex)
                             this.conn.makeMove(data, () => {})
                         }
                     }

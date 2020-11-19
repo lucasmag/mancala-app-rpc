@@ -4,15 +4,22 @@
 
         <div class="options">
             <md-switch v-model="createServer">Criar servidor</md-switch>
-            <md-field>
+            <md-field style="margin: 10px 0">
                 <label>Endereço do servidor</label>
-                <md-input v-model="serverAddress" placeholder="localhost:40000"></md-input>
+                <md-input v-model="serverURI" placeholder="localhost:40000"></md-input>
             </md-field>
+            <span v-if="serverInUse" class="warning" style="margin-bottom: 10px">Endereço e porta estão em uso!</span>
+            <span v-if="serverError" class="warning" style="margin-bottom: 10px">Erro no formato do URI!</span>
+            <span v-if="serverDoesntExists" class="warning" style="margin-bottom: 10px">Servidor não existe!</span>
 
-            <md-field>
+
+            <md-field style="margin: 10px 0">
                 <label>Endereço desde jogo</label>
-                <md-input v-model="clientAddress" placeholder="Digite o endereço desde cliente" ></md-input>
+                <md-input v-model="clientURI" placeholder="Digite o endereço desde cliente" ></md-input>
             </md-field>
+            <span v-if="clientInUse" class="warning" style="margin-bottom: 10px">Endereço e porta estão em uso!</span>
+            <span v-if="clientError" class="warning" style="margin-bottom: 10px">Erro no formato do URI!</span>
+
 
             <md-field>
                 <label>Nome do jogador</label>
@@ -31,51 +38,81 @@ export default {
     data() {
         return {
             isHost: false,
-            addressExists: false,
-            serverAddress: 'localhost:40000',
-            clientAddress: '',
+            serverInUse: false,
+            clientInUse: false,
+            serverError: false,
+            clientError: false,
+            serverDoesntExists: false,
+            serverURI: 'localhost:40000',
+            clientURI: '',
             username: '',
             createServer: true,
+
         };
     },
+    computed: {
+        serverPort: function () { return parseInt(this.serverURI.split(':')[1]) },
+        serverAdress: function () { return this.serverURI.split(':')[0] },
+        clientPort: function () { return parseInt(this.clientURI.split(':')[1]) },
+        clientAddress: function () { return this.clientURI.split(':')[0] }
+    },
     methods: {
-        startGame: function () {
+        checkServer: async function(port, address) {
+            const thisVue = this
+            console.log(port, address);
+            if (port && address) {
+                this.serverError = false
+                await this.$tcpPortUsed.check(port, address).then(function(inUse) {
+                    thisVue.serverInUse = inUse
+                }, function(err) { console.error('Error on check:', err.message) });
+            } else 
+                this.serverError = true
 
-            if (this.createServer) {
+        },
+        checkClient: async function(port, address) {
+            const thisVue = this
+            console.log(port, address);
+            if (port && address) {
+                this.clientError = false
+                await this.$tcpPortUsed.check(port, address).then(function(inUse) {
+                    thisVue.clientInUse = inUse
+                }, function(err) { console.error('Error on check:', err.message) });
+            } else
+                this.clientError = true
+        },
+        startGame: async function () {
+
+            await this.checkServer(this.serverPort, this.serverAdress)
+            await this.checkClient(this.clientPort, this.clientAddress)
+
+            if (this.clientInUse) return
+
+            if (this.serverError || this.clientError) return
+
+            if (this.createServer && !this.serverInUse) {
                 this.isHost = true
                 // this.$server.createServer(this.serverAddress)
-                this.$server.sendSync('startServer', this.serverAddress)
+                this.$server.sendSync('startServer', this.serverURI)
+            } else if (!this.createServer && !this.serverInUse) {
+                this.serverDoesntExists = true
+             
+             return
             }
+
 
             //Cria clientServer
             const clientStub = this.$clientStub
-            clientStub.createClientServer(this.clientAddress)
+            clientStub.createClientServer(this.clientURI)
 
-            const conn = clientStub.getServerConnection(this.serverAddress)
+            const conn = clientStub.getServerConnection(this.serverURI)
             this.$server = conn
 
-            conn.newClient({"address": this.clientAddress, "username": this.username}, (err, response) => {
-                console.log("Dados do jogo: " + JSON.stringify(response));
-            })
+            conn.newClient({"address": this.clientURI, "username": this.username}, () => {})
 
-            // if (this.roomExists) {
-            //     this.$socket.emit('enterRoom', {'roomId': this.roomId, 'player':this.username})
-            //     
-            // }
             this.$router.push({name: 'game', params: { 'username': this.username, 'isHost': this.isHost, 'conn': conn}});
-        },
-        verifyAdress: function() {
-            this.addressExists = true
-        }
-    },
-        sockets: {
-            roomExists(exists) {
-                this.roomExists = exists
-            },
-            roomIsFull(roomId) {
-                console.log(roomId + ' sala tá cheia');
-            }
+            
 
+        }
     },
 };
 </script>

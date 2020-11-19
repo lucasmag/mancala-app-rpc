@@ -54,6 +54,7 @@ export default {
         })
 
         ipc.on('messages', (event, data) => {
+            console.log(data);
             this.messages = data
         })
 

@@ -11,7 +11,6 @@ const clientpackage = grpcClientObject.clientpackage
 const window = require('electron-main-window').getMainWindow();
 
 function createClientServer(clientHost) {
-    console.log("Tentando criar clientServer: " + clientHost);
     const server = new grpc.Server();
     server.bind(clientHost, grpc.ServerCredentials.createInsecure())
     server.addService(clientpackage.Client.service,
