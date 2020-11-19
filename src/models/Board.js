@@ -159,7 +159,6 @@ export class Board {
             .map((hole) => hole.beansQuantity) 
             .reduce((tot, acc) => tot += acc)
 
-        console.log('total--- ' + total);
         return total
     }
 

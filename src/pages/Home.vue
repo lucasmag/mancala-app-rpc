@@ -3,107 +3,116 @@
         <h1 style="padding: 50px 0">Mancala</h1>
 
         <div class="options">
-            <md-button class="md-primary md-raised button" @click="showCreateRoomDialog()">Criar sala</md-button>
-            <md-button class="md-primary md-raised button" @click="showEnterRoomDialog()">Entrar em sala</md-button>
-        </div>
+            <md-switch v-model="createServer">Criar servidor</md-switch>
+            <md-field style="margin: 10px 0">
+                <label>Endereço do servidor</label>
+                <md-input v-model="serverURI" placeholder="localhost:40000"></md-input>
+            </md-field>
+            <span v-if="serverInUse" class="warning" style="margin-bottom: 10px">Endereço e porta estão em uso!</span>
+            <span v-if="serverError" class="warning" style="margin-bottom: 10px">Erro no formato do URI!</span>
+            <span v-if="serverDoesntExists" class="warning" style="margin-bottom: 10px">Servidor não existe!</span>
 
-        <!-- CREATE NEW ROOM-->
-        <md-dialog :md-active.sync="createRoomDialog" class="dialog">
-            <md-dialog-title style="text-align: center">Criar nova sala</md-dialog-title>
 
-            <h3 style="text-align: center">{{this.roomId}}</h3>
+            <md-field style="margin: 10px 0">
+                <label>Endereço desde jogo</label>
+                <md-input v-model="clientURI" placeholder="Digite o endereço desde cliente" ></md-input>
+            </md-field>
+            <span v-if="clientInUse" class="warning" style="margin-bottom: 10px">Endereço e porta estão em uso!</span>
+            <span v-if="clientError" class="warning" style="margin-bottom: 10px">Erro no formato do URI!</span>
+
 
             <md-field>
-                <label>Nome de usuário</label>
+                <label>Nome do jogador</label>
                 <md-input v-model="username"></md-input>
             </md-field>
 
-            <md-dialog-actions>
-                <md-button class="md-primary" @click="createRoomDialog = false"
-                    >Cancelar</md-button
-                >
-                <md-button class="md-primary" @click="createAndEnterGame()"
-                    >Criar</md-button
-                >
-            </md-dialog-actions>
-        </md-dialog>
-
-        <!-- ENTER EXISTING NEW ROOM-->
-
-        <md-dialog :md-active.sync="enterRoomDialog"  class="dialog">
-            <md-dialog-title>Entrar em sala existente</md-dialog-title>
-            
-            <md-field>
-                <label>Código da sala</label>
-                <md-input v-model="roomId" @change="verifyRoom"></md-input>
-            </md-field>
-            <span v-if="!roomExists && this.roomId" class="warning">Sala não existe!</span>
-
-            <md-field>
-                <label>Nome de usuário</label>
-                <md-input v-model="username"></md-input>
-            </md-field>
-
-            <md-dialog-actions>
-                <md-button class="md-primary" @click="enterRoomDialog = false">Cancelar</md-button>
-                <md-button class="md-primary" @click="enterGame()">Entrar</md-button>
-            </md-dialog-actions>
-        </md-dialog>
+            <md-button class="md-primary md-raised button" @click="startGame()">Entrar</md-button>
         </div>
+
+    </div>
 </template>
 
 <script>
-import { customAlphabet } from 'nanoid'
-
-const nanoid = customAlphabet('1234567890ABCDEF', 5)
-
 export default {
     name: "Home",
     data() {
         return {
-            enterRoomDialog: false,
-            createRoomDialog: false,
-            username: '',
-            roomId: '',
             isHost: false,
-            roomExists: false
+            serverInUse: false,
+            clientInUse: false,
+            serverError: false,
+            clientError: false,
+            serverDoesntExists: false,
+            serverURI: 'localhost:40000',
+            clientURI: '',
+            username: '',
+            createServer: true,
+
         };
     },
-    methods: {
-        showCreateRoomDialog: function () {
-            this.createRoomDialog = true
-            this.roomId = nanoid()
-        },
-        showEnterRoomDialog: function () {
-            this.enterRoomDialog = true;
-        },
-        createAndEnterGame: function() {
-            this.isHost = true
-
-            this.$socket.emit('createRoom', this.roomId)
-            this.$socket.emit('enterRoom', {'roomId': this.roomId, 'player':this.username})
-
-            this.$router.push({name: 'game', params: { username: this.username, roomId: this.roomId, isHost: this.isHost}});
-        },
-        enterGame: function () {
-            if (this.roomExists) {
-                console.log('tomar no cu');
-                this.$socket.emit('enterRoom', {'roomId': this.roomId, 'player':this.username})
-                this.$router.push({name: 'game', params: { 'username': this.username, roomId: this.roomId, isHost: this.isHost}});
-            }
-        },
-        verifyRoom: function() {
-            this.$socket.emit('roomExists', this.roomId)
-        }
+    computed: {
+        serverPort: function () { return parseInt(this.serverURI.split(':')[1]) },
+        serverAdress: function () { return this.serverURI.split(':')[0] },
+        clientPort: function () { return parseInt(this.clientURI.split(':')[1]) },
+        clientAddress: function () { return this.clientURI.split(':')[0] }
     },
-        sockets: {
-            roomExists(exists) {
-                this.roomExists = exists
-            },
-            roomIsFull(roomId) {
-                console.log(roomId + ' sala tá cheia');
+    methods: {
+        checkServer: async function(port, address) {
+            const thisVue = this
+            console.log(port, address);
+            if (port && address) {
+                this.serverError = false
+                await this.$tcpPortUsed.check(port, address).then(function(inUse) {
+                    thisVue.serverInUse = inUse
+                }, function(err) { console.error('Error on check:', err.message) });
+            } else 
+                this.serverError = true
+
+        },
+        checkClient: async function(port, address) {
+            const thisVue = this
+            console.log(port, address);
+            if (port && address) {
+                this.clientError = false
+                await this.$tcpPortUsed.check(port, address).then(function(inUse) {
+                    thisVue.clientInUse = inUse
+                }, function(err) { console.error('Error on check:', err.message) });
+            } else
+                this.clientError = true
+        },
+        startGame: async function () {
+
+            await this.checkServer(this.serverPort, this.serverAdress)
+            await this.checkClient(this.clientPort, this.clientAddress)
+
+            if (this.clientInUse) return
+
+            if (this.serverError || this.clientError) return
+
+            if (this.createServer && !this.serverInUse) {
+                this.isHost = true
+                // this.$server.createServer(this.serverAddress)
+                this.$server.sendSync('startServer', this.serverURI)
+            } else if (!this.createServer && !this.serverInUse) {
+                this.serverDoesntExists = true
+             
+             return
             }
 
+
+            //Cria clientServer
+            const clientStub = this.$clientStub
+            clientStub.createClientServer(this.clientURI)
+
+            const conn = clientStub.getServerConnection(this.serverURI)
+            this.$server = conn
+
+            conn.newClient({"address": this.clientURI, "username": this.username}, () => {})
+
+            this.$router.push({name: 'game', params: { 'username': this.username, 'isHost': this.isHost, 'conn': conn}});
+            
+
+        }
     },
 };
 </script>
@@ -118,13 +127,12 @@ export default {
 }
 
 .options {
-    position: absolute;
     padding: 0;
-  height:-webkit-fill-available;
-  width: 300px;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
+    height:-webkit-fill-available;
+    width: 300px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
 }
 
 

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package clientpackage;
+
+service Client {
+    rpc startGame(AllData) returns (None);
+    rpc updateState(GameData) returns (None);
+    rpc broadcastMessages(AllMessages) returns (None);
+}
+
+message GameData {
+    repeated int32 gameState = 1;
+    string action = 2;
+}
+
+message AllData {
+    repeated string players = 1;
+    repeated Message messages = 2;
+    repeated int32 gameState = 3;
+}
+
+message Message {
+    string user = 1;
+    string message = 2;
+    string date = 3;
+}
+
+message AllMessages {
+    repeated Message messages = 1;
+}
+
+message None {}

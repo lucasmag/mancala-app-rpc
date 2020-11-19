@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package mancalapackage;
+
+service Mancala {
+    rpc sendMessage(Message) returns (None);
+    rpc makeMove(Hole) returns (GameData);
+    rpc getMessages(None) returns (AllMessages);
+    rpc restartGame(None) returns (GameData);
+    rpc giveUpGame(None) returns (GameData);
+    rpc newClient(Address) returns (GameData);
+}
+
+message None {}
+
+message Ok {
+    bool ok = 1;
+}
+
+message Message {
+    string user = 1;
+    string message = 2;
+}
+
+message MessageResponse {
+    string user = 1;
+    string message = 2;
+    string date = 3;
+}
+
+message AllMessages {
+    repeated MessageResponse messages = 1;
+}
+
+message Hole {
+    int32 holeIndex = 1;
+}
+
+message GameData {
+    repeated int32 gameState = 1;
+    string action = 2;
+}
+
+message Address {
+    string address = 1;
+    string username = 2;
+}

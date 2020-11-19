@@ -24,12 +24,12 @@
 </template>
 
 <script>
+const ipc = window.require('electron').ipcRenderer
+
+
 export default {
     name: "Chat",
-    props: {
-        username: String,
-        roomId: String,
-    },
+    props: ["username", "conn"],
     data() {
         return {
             messages: [],
@@ -40,21 +40,24 @@ export default {
     methods: {
         sendMessage: function () {
             if (this.toSend !== ''){
-                const data = { "user": this.username, "message": this.toSend, "roomId": this.roomId }
-                this.$socket.emit("message", data);
+                const data = { "user": this.username, "message": this.toSend }
+
+                this.conn.sendMessage(data, () => {})
+
+                this.toSend = ''
             }            
         },
     },
     created() {
-        this.$socket.emit("getMessages", this.roomId);
-    },
-    sockets: {
-        // Escuta novas mensagens
-        message(data) {
+        this.conn.getMessages({}, (err, response) => {
+            this.messages = response.messages
+        })
+
+        ipc.on('messages', (event, data) => {
             console.log(data);
             this.messages = data
-            this.toSend = "";
-        },
+        })
+
     },
 };
 </script>

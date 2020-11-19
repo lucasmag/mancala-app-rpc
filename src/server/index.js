@@ -1,25 +1,80 @@
+const grpc = require("grpc")
+const protoLoader = require("@grpc/proto-loader");
+const packageDef = protoLoader.loadSync("mancala.proto", {})
+const grpcObject = grpc.loadPackageDefinition(packageDef)
+const mancalaPackage = grpcObject.mancalapackage;
 
-const io = require('socket.io')(4113, { serveClient: false });
-import { Board } from '../models/Board.js'
-import { action } from '../enums/action.js'
+const clientpackageDef = protoLoader.loadSync("client.proto", {})
+const grpcClientObject = grpc.loadPackageDefinition(clientpackageDef)
+const clientpackage = grpcClientObject.clientpackage
 
-// Estrutura de uma sala
-//  "D0R3C": {
+import { Board } from "../models/Board"
+import { action } from '../enums/action.js' 
+
+let board = new Board()
+
+// Estrutura da sala
+// room: {
 //     players: [ 'Lucas', 'Ana' ],
 //     messages: [
 //         {'user': 'Lucas',
 //         'message: 'Olá!',
-//         'date: 2020-10-18 13:23:03'
+//         'date: 2020-10-18 13:23:03'}
 //     ],
 //     gameState: [
 //       4, 4, 0, 5, 5, 5,
 //       1, 4, 4, 4, 4, 4,
 //       4, 0
-//     ]
-//   }
+//     ]]
+// }
 
-let rooms = {}
-let boards = {}
+let room = {}
+let messages = []
+let players = []
+let clients = []
+
+export function createServer(serverAdress) {
+    if (serverAdress) {
+
+        const server = new grpc.Server();
+        server.bind(serverAdress, grpc.ServerCredentials.createInsecure())
+        server.addService(mancalaPackage.Mancala.service,
+            {
+                "newClient": newClient,
+                "sendMessage": sendMessage,
+                "makeMove": makeMove,
+                "getMessages": getMessages,
+                "restartGame": restartGame,
+                "giveUpGame": giveUpGame,
+            });
+    
+        server.start()
+        console.log("gRPC server started!")
+    }
+}
+
+//===============================================================
+
+function newClient(call, callback) {
+
+    let client = new clientpackage.Client(call.request["address"], grpc.credentials.createInsecure())
+
+    clients.push(client)
+    players.push(call.request.username)
+
+    if (clients.length == 2) {
+
+        room = {
+            'players': players, 
+            'messages': messages, 
+            'gameState': board.getState()
+        }
+    
+        clients.forEach(client => {
+            client.startGame(room , () => {})
+        });
+    }
+}
 
 function getDate(){
     let d = new Date()
@@ -29,80 +84,51 @@ function getDate(){
     return datestring
 }
 
-io.on('connection', function (socket) {    
+function sendMessage(call, callback) {
+    messages.push({
+        'user': call.request.user, 
+        'message': call.request.message,
+        'date': getDate()
+    }) 
+    console.log(call);
 
-    socket.on('message', (data) => {
-        rooms[data.roomId].messages.push({
-            'user': data.user, 
-            'message': data.message,
-            'date': getDate()
-        })
-        io.to(data.roomId).emit('message', rooms[data.roomId].messages)
+    clients.forEach(client => {
+        client.broadcastMessages({"messages": messages} , () => {})
     });
+}
 
-    socket.on('makeMove', (data) => {
-      const result = boards[data.roomId].makeMove(data.holeIndex)
-      console.log (result)
-      io.to(data.roomId).emit('updateState', result)
-    });
-
-    socket.on('roomExists', (roomId) => {
-        const roomExists = roomId in rooms
-        io.emit('roomExists', roomExists)
-    });
-
-    socket.on('enterRoom', (data) => {
-        console.log(rooms);
-        console.log(rooms[data.roomId].players.length)
-        if (rooms[data.roomId].players.length < 2) {
-            rooms[data.roomId].players.push(data.player)
-            console.log(rooms)
+function makeMove(call, callback) {
+    let result = board.makeMove(call.request.holeIndex)
     
-            socket.join(data.roomId);
-            if (rooms[data.roomId].players.length == 2) 
-                io.emit('startGame', rooms[data.roomId])
-        } else {
-            io.emit('roomIsFull', data.roomId)
-        }
+    clients.forEach(client => {
+        client.updateState(result , () => {})
     });
+}
 
-    socket.on('createRoom', (roomId) => {
-        let board = new Board()
+function getMessages(call, callback) {
+    callback(null, {"messages": messages})
+}
 
-        rooms[roomId] = {
-            'players': [], 
-            'messages': [], 
-            'gameState': board.getState()
-        }
+function restartGame(call, callback) {
 
-        boards[roomId] = board
+    let result = {
+        'gameState': board.toInitialState(),
+        'action': action.RESTART,
+    }
 
-        io.emit('roomExists', true)
+    clients.forEach(client => {
+        client.updateState(result , () => {})
     });
+}
 
-    socket.on("getMessages", roomId => {
-        io.to(roomId).emit('message', rooms[roomId].messages)
+function giveUpGame(call, callback) {
+
+    let result = {
+        'gameState': board.toInitialState(),
+        'action': action.GIVE_UP,
+    }
+
+    clients.forEach(client => {
+        client.updateState(result , () => {})
     })
-
-    socket.on("restartGame", roomId => {
-        let gameState = boards[roomId].toInitialState()
-
-        let result = {
-            'gameState': gameState,
-            'action': action.RESTART,
-        }
-
-        io.to(roomId).emit('updateState', result)
-    })
-
-    socket.on("giveUpGame", roomId => {
-        let gameState = boards[roomId].toInitialState()
-
-        let result = {
-            'gameState': gameState,
-            'action': action.GIVE_UP,
-        }
-
-        io.to(roomId).emit('updateState', result)
-    })
-});
+}
