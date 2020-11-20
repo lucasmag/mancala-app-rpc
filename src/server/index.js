@@ -1,10 +1,10 @@
 const grpc = require("grpc")
 const protoLoader = require("@grpc/proto-loader");
-const packageDef = protoLoader.loadSync("mancala.proto", {})
+const packageDef = protoLoader.loadSync("mancala.proto", {includeDirs: ['../']})
 const grpcObject = grpc.loadPackageDefinition(packageDef)
 const mancalaPackage = grpcObject.mancalapackage;
 
-const clientpackageDef = protoLoader.loadSync("client.proto", {})
+const clientpackageDef = protoLoader.loadSync("client.proto", {includeDirs: ['../']})
 const grpcClientObject = grpc.loadPackageDefinition(clientpackageDef)
 const clientpackage = grpcClientObject.clientpackage
 

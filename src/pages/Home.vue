@@ -85,7 +85,7 @@ export default {
             await this.checkServer(this.serverPort, this.serverAdress)
             await this.checkClient(this.clientPort, this.clientAddress)
 
-            if (this.clientInUse) return
+            if (this.clientInUse  || (this.createServer && this.serverInUse)) return
 
             if (this.serverError || this.clientError) return
 
